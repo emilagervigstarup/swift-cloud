@@ -29,13 +29,16 @@ extension Docker.Dockerfile {
         COPY ./.build/\(architecture.swiftBuildLinuxDirectory)/release/\(targetName) /var/runtime/bootstrap
         COPY ./.build/\(architecture.swiftBuildLinuxDirectory)/release/*.resources /var/runtime/
 
+        # Sørg for at bootstrap kan eksekveres og har korrekte linjeskift
+        RUN chmod 755 /var/runtime/bootstrap && sed -i 's/\r$//' /var/runtime/bootstrap
+
         # Copy directories if they exist
         COPY ./Content* /var/task/Content
         COPY ./Public* /var/task/Public
         COPY ./Resources* /var/task/Resources
         COPY ./Output* /var/task/Output
 
-        CMD [ "\(targetName)" ]
+        CMD [ "bootstrap" ]
         """
     }
 
