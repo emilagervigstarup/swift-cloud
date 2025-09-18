@@ -24,13 +24,42 @@ extension Docker.Dockerfile {
     
     public static func awsLambda(targetName: String, architecture: Architecture = .current) -> String {
         """
-        FROM public.ecr.aws/lambda/provided:al2
+        # syntax=docker/dockerfile:1.6
 
-        COPY ./.build/\(architecture.swiftBuildLinuxDirectory)/release/\(targetName) /var/runtime/bootstrap
-        COPY ./.build/\(architecture.swiftBuildLinuxDirectory)/release/*.resources /var/runtime/
+############################
+# 1) BUILDER (Amazon Linux 2 + Swift)
+############################
+ARG TARGETPLATFORM=linux/arm64
+FROM --platform=$TARGETPLATFORM swift:6.0-amazonlinux2 AS builder
+WORKDIR /src
 
-        # Sørg for at bootstrap kan eksekveres og har korrekte linjeskift
-        RUN chmod 755 /var/runtime/bootstrap && sed -i 's/\r$//' /var/runtime/bootstrap
+# Kopiér kun det nødvendige for hurtigere layer-cache
+COPY Package.* ./
+COPY Sources ./Sources
+# (tilføj evt. Resources/ osv. hvis de indgår i build)
+
+# Byg release-binær og strip (ERSTAT <TARGET_NAME> med dit Swift target, fx UserUpload)
+RUN swift build -c release \
+ && strip -S -x .build/release/\(targetName)
+
+############################
+# 2) RUNTIME (AWS Lambda custom runtime - AL2)
+############################
+ARG TARGETPLATFORM=linux/arm64
+FROM --platform=$TARGETPLATFORM public.ecr.aws/lambda/provided:al2
+
+# Binæren SKAL hedde bootstrap og ligge i /var/runtime
+COPY --from=builder /src/.build/release/\(targetName) /var/runtime/bootstrap
+
+# Kopiér Swift stdlib + relaterede libs
+COPY --from=builder /usr/lib/swift/linux/ /opt/swift-libs/
+COPY --from=builder /usr/lib64/           /opt/usr-lib64/
+
+# Gør eksekverbar og fjern evt. CRLF
+RUN chmod 755 /var/runtime/bootstrap && sed -i 's/\r$//' /var/runtime/bootstrap
+
+# Loaderen skal kunne finde libs
+ENV LD_LIBRARY_PATH="/var/runtime:/var/task:/opt/swift-libs:/opt/usr-lib64:/lib64:/usr/lib64:/lib:/usr/lib"
 
         # Copy directories if they exist
         COPY ./Content* /var/task/Content
