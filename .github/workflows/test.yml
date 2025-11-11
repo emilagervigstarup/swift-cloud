@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: swiftlang/swift:nightly-${{ matrix.swift }}-noble
+      image: swift:${{ matrix.swift }}
 
     strategy:
       matrix:
@@ -27,9 +27,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .build
-          key: ${{ runner.os }}-spm-${{ matrix.swift }}-${{ hashFiles('**/Package.resolved') }}
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-spm-${{ matrix.swift }}-
+            ${{ runner.os }}-spm-
 
       - run: swift --version
 

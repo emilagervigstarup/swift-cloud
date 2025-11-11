@@ -135,6 +135,23 @@ extension AWS {
                     )
                 }
 
+            // AWS requires a new permission for public function url access
+            if functionUrl != nil {
+                Resource(
+                    name: "\(name)-invoke-permission",
+                    type: "aws:lambda:Permission",
+                    properties: [
+                        "action": "lambda:InvokeFunction",
+                        "function": function.arn,
+                        "principal": "*",
+                            // TODO: Enable when Pulumi supports function url invocation context
+                            // "invokedViaFunctionUrl": true,
+                    ],
+                    options: options,
+                    context: context
+                )
+            }
+
             context.store.build { ctx in
                 try await ctx.builder.buildAmazonLinux(targetName: targetName)
                 switch packageType {
