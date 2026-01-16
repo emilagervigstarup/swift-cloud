@@ -36,7 +36,7 @@ extension Builder {
         if isAmazonLinux() {
             try await buildNative(
                 targetName: targetName,
-                flags: ["--static-swift-stdlib"]
+                flags: ["--static-swift-stdlib", "-Xswiftc", "-Osize", "-Xswiftc", "-whole-module-optimization", "-Xlinker", "-dead_strip"]
             )
         } else {
             let swiftVersion = try await currentSwiftVersion()
@@ -57,7 +57,7 @@ extension Builder {
                 targetName: targetName,
                 architecture: architecture,
                 imageName: imageName,
-                flags: ["--static-swift-stdlib", "-Xswiftc", "-Osize", "-Xswiftc", "-whole-module-optimization"]
+                flags: ["--static-swift-stdlib", "-Xswiftc", "-Osize", "-Xswiftc", "-whole-module-optimization", "-Xlinker", "-dead_strip"]
             )
         }
     }
@@ -83,7 +83,7 @@ extension Builder {
             targetName: targetName,
             architecture: architecture,
             imageName: imageName,
-            flags: ["--static-swift-stdlib", "-Xswiftc", "-Osize", "-Xswiftc", "-whole-module-optimization"],
+            flags: ["--static-swift-stdlib", "-Xswiftc", "-Osize", "-Xswiftc", "-whole-module-optimization", "-Xlinker", "-dead_strip"],
             pre: "apt-get -q update && apt-get install -y libjemalloc-dev"
         )
     }
