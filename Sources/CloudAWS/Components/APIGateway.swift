@@ -35,6 +35,8 @@ extension AWS {
         public init(
             _ name: String,
             domainName: DomainName? = nil,
+            stageName: String = "$default",
+            apiMappingKey: String? = nil,
             cors: Bool = true,
             logFormat: LogFormat = .default,
             options: Resource.Options? = nil,
@@ -75,7 +77,7 @@ extension AWS {
                 type: "aws:apigatewayv2:Stage",
                 properties: [
                     "apiId": api.id,
-                    "name": "$default",
+                    "name": stageName,
                     "autoDeploy": true,
                     "accessLogSettings": [
                         "destinationArn": logGroup.arn,
@@ -115,7 +117,8 @@ extension AWS {
                     properties: [
                         "apiId": api.id,
                         "domainName": apigwDomain.id,
-                        "stage": stage.id,
+                        "stage": stage.name,
+                        "apiMappingKey": apiMappingKey,
                     ],
                     options: options,
                     context: context
