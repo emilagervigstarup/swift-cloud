@@ -187,7 +187,10 @@ extension Builder {
         let spinner = UI.spinner(label: #"Building target "\#(targetName)""#)
         defer { spinner.stop() }
 
-        let buildCommand = "swift build -c release --jobs 2 --product \(targetName) \(flags.joined(separator: " "))"
+        // Multiple Lambda functions are built concurrently, while Docker mounts
+        // the same SwiftPM build directory for all of them. Serialize those
+        // builds to prevent concurrent writers from corrupting module outputs.
+        let buildCommand = "flock /workspace/.build/swift-cloud-build.lock swift build -c release --jobs 2 --product \(targetName) \(flags.joined(separator: " "))"
         spinner.push(buildCommand)
 
         try await shellOut(
