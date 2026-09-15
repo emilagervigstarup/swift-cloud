@@ -182,6 +182,7 @@ extension Builder {
             arguments: [
                 "build",
                 "-c", "release",
+                "--jobs", "1",
                 "--product", targetName,
             ] + flags,
             onEvent: { spinner.push($0.string()) }
@@ -199,7 +200,7 @@ extension Builder {
         let spinner = UI.spinner(label: #"Building target "\#(targetName)""#)
         defer { spinner.stop() }
 
-        let swiftBuildCommand = "swift build -c release --product \(targetName) \(flags.joined(separator: " "))"
+        let swiftBuildCommand = "swift build -c release --jobs 1 --product \(targetName) \(flags.joined(separator: " "))"
         let buildCommand = lockPath.map { "flock \($0) \(swiftBuildCommand)" } ?? swiftBuildCommand
         spinner.push(buildCommand)
 
