@@ -50,10 +50,6 @@ extension Architecture {
         }
     }
 
-    public var swiftCloudBuildLinuxDirectory: String {
-        "swift-cloud-linux/\(swiftBuildLinuxDirectory)"
-    }
-
     public var swiftBuildStaticLinuxDirectory: String {
         switch self {
         case .arm64:

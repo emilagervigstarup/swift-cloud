@@ -41,7 +41,7 @@ extension Builder {
         if isAmazonLinux() {
             try await buildNative(
                 targetName: targetName,
-                flags: ["--scratch-path", "\(Context.buildDirectory)/swift-cloud-linux"] + flags
+                flags: flags
             )
         } else {
             let swiftVersion: String
@@ -73,8 +73,7 @@ extension Builder {
                 targetName: targetName,
                 architecture: architecture,
                 imageName: imageName,
-                flags: ["--scratch-path", "/workspace/.build/swift-cloud-linux"] + flags,
-                lockPath: "/workspace/.build/swift-cloud-linux.lock"
+                flags: flags
             )
         }
     }
@@ -182,7 +181,6 @@ extension Builder {
             arguments: [
                 "build",
                 "-c", "release",
-                "--jobs", "1",
                 "--product", targetName,
             ] + flags,
             onEvent: { spinner.push($0.string()) }
@@ -194,14 +192,12 @@ extension Builder {
         architecture: Architecture = .current,
         imageName: String,
         flags: [String],
-        pre: String = ":",
-        lockPath: String? = nil
+        pre: String = ":"
     ) async throws {
         let spinner = UI.spinner(label: #"Building target "\#(targetName)""#)
         defer { spinner.stop() }
 
-        let swiftBuildCommand = "swift build -c release --jobs 1 --product \(targetName) \(flags.joined(separator: " "))"
-        let buildCommand = lockPath.map { "flock \($0) \(swiftBuildCommand)" } ?? swiftBuildCommand
+        let buildCommand = "swift build -c release --product \(targetName) \(flags.joined(separator: " "))"
         spinner.push(buildCommand)
 
         try await shellOut(
