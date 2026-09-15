@@ -44,7 +44,8 @@ extension Builder {
                 flags: flags
             )
         } else {
-            let swiftVersion = try await currentSwiftVersion()
+            let swiftVersion = ProcessInfo.processInfo.environment["SWIFT_CLOUD_BUILD_SWIFT_VERSION"]
+                ?? (try await currentSwiftVersion())
             let imageName: String
             switch swiftVersion {
             case "5.10":
