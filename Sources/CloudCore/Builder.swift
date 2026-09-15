@@ -57,6 +57,8 @@ extension Builder {
                 imageName = "swift:6.2-amazonlinux2"
             case "6.3":
                 imageName = "swift:6.3-amazonlinux2"
+            case "6.4":
+                imageName = "swift:6.4.0-amazonlinux2023"
             default:
                 fatalError("Unsupported Swift version: \(swiftVersion)")
             }
@@ -107,6 +109,8 @@ extension Builder {
             imageName = "swift:6.2-noble"
         case "6.3":
             imageName = "swift:6.3-noble"
+        case "6.4":
+            imageName = "swift:6.4-noble"
         default:
             fatalError("Unsupported Swift version: \(swiftVersion)")
         }
