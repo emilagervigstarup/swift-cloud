@@ -170,7 +170,7 @@ extension AWS {
                 let swiftBuildDirectory: String
                 switch build {
                 case .docker:
-                    swiftBuildDirectory = architecture.swiftBuildLinuxDirectory
+                    swiftBuildDirectory = architecture.swiftCloudBuildLinuxDirectory
                     try await ctx.builder.buildAmazonLinux(targetName: targetName, architecture: architecture, buildOptions: buildOptions)
                 case .staticLinuxSDK:
                     swiftBuildDirectory = architecture.swiftBuildStaticLinuxDirectory
