@@ -58,8 +58,7 @@ extension Builder {
             case "6.3":
                 imageName = "swift:6.3-amazonlinux2"
             case "6.4":
-                imageName = ProcessInfo.processInfo.environment["SWIFT_CLOUD_AMAZON_LINUX_6_4_IMAGE"]
-                    ?? "swift:6.4.0-amazonlinux2023"
+                imageName = "swift:6.4.0-amazonlinux2023"
             default:
                 fatalError("Unsupported Swift version: \(swiftVersion)")
             }
