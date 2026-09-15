@@ -44,8 +44,14 @@ extension Builder {
                 flags: flags
             )
         } else {
-            let swiftVersion = ProcessInfo.processInfo.environment["SWIFT_CLOUD_BUILD_SWIFT_VERSION"]
-                ?? (try await currentSwiftVersion())
+            let swiftVersion: String
+            if let override = ProcessInfo.processInfo.environment["SWIFT_CLOUD_BUILD_SWIFT_VERSION"],
+                !override.isEmpty
+            {
+                swiftVersion = override
+            } else {
+                swiftVersion = try await currentSwiftVersion()
+            }
             let imageName: String
             switch swiftVersion {
             case "5.10":
