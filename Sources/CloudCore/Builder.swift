@@ -66,6 +66,16 @@ extension Builder {
                 imageName = "swift:6.3-amazonlinux2"
             case "6.4":
                 imageName = "swift:6.4.0-amazonlinux2023"
+                // Swift 6.4's static Foundation archives do not propagate all
+                // native autolink entries required by FoundationNetworking.
+                flags += [
+                    "-Xlinker", "-lCoreFoundation",
+                    "-Xlinker", "-l_FoundationICU",
+                    "-Xlinker", "-l_FoundationCShims",
+                    "-Xlinker", "-l_FoundationCollections",
+                    "-Xlinker", "-l_CFURLSessionInterface",
+                    "-Xlinker", "-lcurl",
+                ]
             default:
                 fatalError("Unsupported Swift version: \(swiftVersion)")
             }
