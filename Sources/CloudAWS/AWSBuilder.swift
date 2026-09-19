@@ -7,27 +7,28 @@ extension Builder {
         swiftBuildDirectory: String? = nil
     ) async throws {
         let swiftBuildDirectory = swiftBuildDirectory ?? architecture.swiftBuildLinuxDirectory
-        var releaseDirectory = "\(Context.buildDirectory)/\(swiftBuildDirectory)/release"
+        let swiftBuildArchitecture: String
+        switch architecture {
+        case .arm64:
+            swiftBuildArchitecture = "aarch64"
+        case .x86:
+            swiftBuildArchitecture = "x86_64"
+        }
+        let swiftBuildPlatform = swiftBuildDirectory.hasSuffix("swift-linux-musl")
+            ? "staticlinux"
+            : "linux"
+        let swiftBuildReleaseDirectories = [
+            "\(Context.buildDirectory)/out/Products/Release-\(swiftBuildPlatform)-\(swiftBuildArchitecture)",
+            "\(Context.buildDirectory)/\(swiftBuildDirectory)/release",
+        ]
+        var releaseDirectory = swiftBuildReleaseDirectories[0]
         var binaryPath = "\(releaseDirectory)/\(targetName)"
-        if !Files.fileExists(atPath: binaryPath) {
-            let swiftBuildArchitecture: String
-            switch architecture {
-            case .arm64:
-                swiftBuildArchitecture = "aarch64"
-            case .x86:
-                swiftBuildArchitecture = "x86_64"
-            }
-            let swiftBuildReleaseDirectories = [
-                "\(Context.buildDirectory)/out/Products/Release-linux-\(swiftBuildArchitecture)",
-                "\(Context.buildDirectory)/out/Products/Release-staticlinux-\(swiftBuildArchitecture)",
-            ]
-            for candidateReleaseDirectory in swiftBuildReleaseDirectories {
-                let candidateBinaryPath = "\(candidateReleaseDirectory)/\(targetName)"
-                if Files.fileExists(atPath: candidateBinaryPath) {
-                    releaseDirectory = candidateReleaseDirectory
-                    binaryPath = candidateBinaryPath
-                    break
-                }
+        for candidateReleaseDirectory in swiftBuildReleaseDirectories {
+            let candidateBinaryPath = "\(candidateReleaseDirectory)/\(targetName)"
+            if Files.fileExists(atPath: candidateBinaryPath) {
+                releaseDirectory = candidateReleaseDirectory
+                binaryPath = candidateBinaryPath
+                break
             }
         }
         let lambdaDirectory = "\(Context.buildDirectory)/lambda/\(targetName)"
