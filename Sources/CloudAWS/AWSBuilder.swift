@@ -7,8 +7,23 @@ extension Builder {
         swiftBuildDirectory: String? = nil
     ) async throws {
         let swiftBuildDirectory = swiftBuildDirectory ?? architecture.swiftBuildLinuxDirectory
-        let releaseDirectory = "\(Context.buildDirectory)/\(swiftBuildDirectory)/release"
-        let binaryPath = "\(releaseDirectory)/\(targetName)"
+        var releaseDirectory = "\(Context.buildDirectory)/\(swiftBuildDirectory)/release"
+        var binaryPath = "\(releaseDirectory)/\(targetName)"
+        if !Files.fileExists(atPath: binaryPath) {
+            let swiftBuildArchitecture: String
+            switch architecture {
+            case .arm64:
+                swiftBuildArchitecture = "aarch64"
+            case .x86:
+                swiftBuildArchitecture = "x86_64"
+            }
+            let swiftBuildReleaseDirectory = "\(Context.buildDirectory)/out/Products/Release-linux-\(swiftBuildArchitecture)"
+            let swiftBuildBinaryPath = "\(swiftBuildReleaseDirectory)/\(targetName)"
+            if Files.fileExists(atPath: swiftBuildBinaryPath) {
+                releaseDirectory = swiftBuildReleaseDirectory
+                binaryPath = swiftBuildBinaryPath
+            }
+        }
         let lambdaDirectory = "\(Context.buildDirectory)/lambda/\(targetName)"
         let bootstrapPath = "\(lambdaDirectory)/bootstrap"
         try? Files.removeDirectory(atPath: lambdaDirectory)
