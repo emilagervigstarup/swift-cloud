@@ -17,11 +17,17 @@ extension Builder {
             case .x86:
                 swiftBuildArchitecture = "x86_64"
             }
-            let swiftBuildReleaseDirectory = "\(Context.buildDirectory)/out/Products/Release-linux-\(swiftBuildArchitecture)"
-            let swiftBuildBinaryPath = "\(swiftBuildReleaseDirectory)/\(targetName)"
-            if Files.fileExists(atPath: swiftBuildBinaryPath) {
-                releaseDirectory = swiftBuildReleaseDirectory
-                binaryPath = swiftBuildBinaryPath
+            let swiftBuildReleaseDirectories = [
+                "\(Context.buildDirectory)/out/Products/Release-linux-\(swiftBuildArchitecture)",
+                "\(Context.buildDirectory)/out/Products/Release-staticlinux-\(swiftBuildArchitecture)",
+            ]
+            for candidateReleaseDirectory in swiftBuildReleaseDirectories {
+                let candidateBinaryPath = "\(candidateReleaseDirectory)/\(targetName)"
+                if Files.fileExists(atPath: candidateBinaryPath) {
+                    releaseDirectory = candidateReleaseDirectory
+                    binaryPath = candidateBinaryPath
+                    break
+                }
             }
         }
         let lambdaDirectory = "\(Context.buildDirectory)/lambda/\(targetName)"

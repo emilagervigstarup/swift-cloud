@@ -92,14 +92,24 @@ extension Builder {
 extension Builder {
     public func buildStaticLinux(targetName: String, architecture: Architecture = .current, buildOptions: BuildOptions = []) async throws {
         let swiftSDK: String
+        let targetTriple: String
         switch architecture {
         case .arm64:
             swiftSDK = "aarch64-swift-linux-musl"
+            targetTriple = "aarch64-swift-linux-musl"
         case .x86:
             swiftSDK = "x86_64-swift-linux-musl"
+            targetTriple = "x86_64-swift-linux-musl"
         }
 
-        var flags = ["--swift-sdk", swiftSDK]
+        let swiftVersion = try await currentSwiftVersion()
+        let selectedSDK = swiftVersion == "6.4"
+            ? "swift-6.4.0-RELEASE_static-linux-0.1.0"
+            : swiftSDK
+        var flags = ["--swift-sdk", selectedSDK]
+        if selectedSDK != swiftSDK {
+            flags += ["--triple", targetTriple]
+        }
         if buildOptions.contains(.stripSymbols) {
             flags += ["-Xlinker", "-s"] // strip symbols
         }
