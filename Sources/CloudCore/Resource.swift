@@ -49,6 +49,7 @@ public struct Resource: Sendable {
                     ? nil
                     : .init(
                         dependsOn: (dependsOn ?? options?.dependsOn)?.map { $0.output },
+                        ignoreChanges: options?.ignoreChanges,
                         protect: options?.protect,
                         provider: options?.provider?.output),
                 get: existingId.map { .init(id: $0) }
@@ -78,15 +79,18 @@ extension Resource {
 extension Resource {
     public struct Options: Sendable {
         public var dependsOn: [any ResourceProvider]?
+        public var ignoreChanges: [String]?
         public var protect: Bool?
         public var provider: (any ResourceProvider)?
 
         public init(
             dependsOn: [any ResourceProvider]? = nil,
+            ignoreChanges: [String]? = nil,
             protect: Bool? = nil,
             provider: (any ResourceProvider)? = nil
         ) {
             self.dependsOn = dependsOn
+            self.ignoreChanges = ignoreChanges
             self.protect = protect
             self.provider = provider
         }
@@ -94,6 +98,10 @@ extension Resource {
 }
 
 extension Resource.Options {
+    public static func ignoreChanges(_ propertyPaths: [String]) -> Resource.Options {
+        .init(ignoreChanges: propertyPaths)
+    }
+
     public static func protect(_ value: Bool? = true) -> Resource.Options {
         .init(protect: value)
     }
@@ -109,6 +117,12 @@ extension Resource.Options {
     public func protect(_ value: Bool? = true) -> Resource.Options {
         var copy = self
         copy.protect = value
+        return copy
+    }
+
+    public func ignoreChanges(_ propertyPaths: [String]) -> Resource.Options {
+        var copy = self
+        copy.ignoreChanges = propertyPaths
         return copy
     }
 
